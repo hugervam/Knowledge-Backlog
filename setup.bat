@@ -21,14 +21,22 @@ echo Test 2: echo
 echo This is a test
 echo.
 
+echo [DEBUG] About to check command_exists function
+echo [DEBUG] Current errorlevel: %errorlevel%
+
 REM Function to check if a command exists
 :command_exists
+echo [DEBUG] Inside command_exists function
 where %1 >nul 2>nul
 if %errorlevel% neq 0 (
+    echo [DEBUG] Command %1 not found
     exit /b 1
 ) else (
+    echo [DEBUG] Command %1 found
     exit /b 0
 )
+
+echo [DEBUG] After command_exists function definition
 
 REM Function to install project dependencies
 :install_dependencies
