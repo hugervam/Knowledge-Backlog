@@ -157,12 +157,45 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 # Check if we're in a git repository
+Write-Host "`nChecking repository status..." -ForegroundColor Yellow
 if (-not (Test-Path ".git")) {
-    Write-Host "Repository not found. Please make sure you're in the correct directory." -ForegroundColor Red
-    exit 1
+    Write-Host "Git repository not found in current directory." -ForegroundColor Yellow
+    Write-Host "Current directory: $PWD" -ForegroundColor Yellow
+    
+    # Check if we're in a parent directory that might contain the project
+    $projectDirs = Get-ChildItem -Directory -Depth 1 | Where-Object { Test-Path (Join-Path $_.FullName ".git") }
+    
+    if ($projectDirs.Count -gt 0) {
+        Write-Host "`nFound potential project directories:" -ForegroundColor Yellow
+        $projectDirs | ForEach-Object { Write-Host "- $($_.Name)" -ForegroundColor Cyan }
+        Write-Host "`nPlease run this script from the correct project directory." -ForegroundColor Yellow
+        Write-Host "You can use 'cd' to change to the correct directory." -ForegroundColor Yellow
+    } else {
+        Write-Host "`nNo git repository found in current directory or subdirectories." -ForegroundColor Yellow
+        Write-Host "Please make sure you:" -ForegroundColor Yellow
+        Write-Host "1. Have cloned the repository correctly" -ForegroundColor Yellow
+        Write-Host "2. Are running this script from the root of the repository" -ForegroundColor Yellow
+        Write-Host "3. Have initialized git in this directory if this is a new project" -ForegroundColor Yellow
+    }
+    
+    $response = Read-Host "`nWould you like to initialize a new git repository here? (y/n)"
+    if ($response -eq 'y') {
+        Write-Host "Initializing new git repository..." -ForegroundColor Yellow
+        git init
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "Git repository initialized successfully." -ForegroundColor Green
+        } else {
+            Write-Host "Failed to initialize git repository." -ForegroundColor Red
+            exit 1
+        }
+    } else {
+        Write-Host "`nPlease run this script from the correct project directory." -ForegroundColor Yellow
+        exit 1
+    }
 }
 
 # Install project dependencies
+Write-Host "`nInstalling project dependencies..." -ForegroundColor Yellow
 if (-not (Install-ProjectDependencies)) {
     Write-Host "Failed to install project dependencies" -ForegroundColor Red
     exit 1
