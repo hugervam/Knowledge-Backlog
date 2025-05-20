@@ -1,21 +1,18 @@
 === Knowledge Backlog Setup Script ===
 ====================================
 Checking for Node.js...
-Node.js is not installed
-Installing Node.js...
-Downloading Node.js installer...
-Installing Node.js...
+Node.js is already installed: v18.17.0
+Warning: Node.js version is older than recommended (v20.x)
+Some features might not work correctly
+Consider updating to Node.js v20.x LTS
 Checking for npm...
 npm is already installed: 9.6.7
 Checking for Git...
 Git is already installed: git version 2.49.0.windows.1
 Installing global npm packages...
-npm ERR! code EBADENGINE
-npm ERR! engine Unsupported engine
-npm ERR! engine Not compatible with your version of node/npm: npm@11.4.0
-npm ERR! notsup Not compatible with your version of node/npm: npm@11.4.0
-npm ERR! notsup Required: {"node":"^20.17.0 || >=22.9.0"}
-npm ERR! notsup Actual:   {"npm":"9.6.7","node":"v18.17.0"}
 
-npm ERR! A complete log of this run can be found in: C:\Users\LEGOADMIN\AppData\Local\npm-cache\_logs\2025-05-20T13_31_11_166Z-debug-0.log
-Failed to update npm
+added 1 package in 6s
+
+28 packages are looking for funding
+  run `npm fund` for details
+Repository not found. Please make sure you're in the correct directory.
