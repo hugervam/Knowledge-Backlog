@@ -43,13 +43,13 @@ if %errorlevel% neq 0 (
             Test-NetConnection nodejs.org -Port 443
             
             Write-Host 'Downloading Node.js installer...'
-            $url = 'https://nodejs.org/dist/v18.17.0/node-v18.17.0-x64.msi'
-            $output = 'node-installer.msi'
+            $nodeUrl = 'https://nodejs.org/dist/v18.17.0/node-v18.17.0-x64.msi'
+            $installerPath = Join-Path $PWD.Path 'node-installer.msi'
             
             [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-            Invoke-WebRequest -Uri $url -OutFile $output -UseBasicParsing
+            Invoke-WebRequest -Uri $nodeUrl -OutFile $installerPath -UseBasicParsing
             
-            if (Test-Path $output) {
+            if (Test-Path $installerPath) {
                 Write-Host 'Download completed successfully'
                 exit 0
             } else {
