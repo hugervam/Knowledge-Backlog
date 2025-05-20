@@ -24,55 +24,6 @@ echo.
 echo [DEBUG] About to check command_exists function
 echo [DEBUG] Current errorlevel: %errorlevel%
 
-REM Function to check if a command exists
-:command_exists
-echo [DEBUG] Inside command_exists function
-where %1 >nul 2>nul
-if %errorlevel% neq 0 (
-    echo [DEBUG] Command %1 not found
-    exit /b 1
-) else (
-    echo [DEBUG] Command %1 found
-    exit /b 0
-)
-
-echo [DEBUG] After command_exists function definition
-
-REM Function to install project dependencies
-:install_dependencies
-echo Installing project dependencies...
-
-REM Install backend dependencies
-if exist "backend" (
-    echo Installing backend dependencies...
-    cd backend
-    call npm install
-    if !errorlevel! neq 0 (
-        echo Failed to install backend dependencies
-        exit /b 1
-    )
-    cd ..
-) else (
-    echo Backend directory not found
-    exit /b 1
-)
-
-REM Install frontend dependencies
-if exist "frontend" (
-    echo Installing frontend dependencies...
-    cd frontend
-    call npm install
-    if !errorlevel! neq 0 (
-        echo Failed to install frontend dependencies
-        exit /b 1
-    )
-    cd ..
-) else (
-    echo Frontend directory not found
-    exit /b 1
-)
-goto :eof
-
 REM Check for Node.js
 echo Checking for Node.js...
 call :command_exists node
@@ -188,4 +139,51 @@ echo You can now run start-servers.bat to start the application
 echo.
 
 REM Keep the window open
-pause 
+pause
+
+REM Function to check if a command exists
+:command_exists
+echo [DEBUG] Inside command_exists function
+where %1 >nul 2>nul
+if %errorlevel% neq 0 (
+    echo [DEBUG] Command %1 not found
+    exit /b 1
+) else (
+    echo [DEBUG] Command %1 found
+    exit /b 0
+)
+
+REM Function to install project dependencies
+:install_dependencies
+echo Installing project dependencies...
+
+REM Install backend dependencies
+if exist "backend" (
+    echo Installing backend dependencies...
+    cd backend
+    call npm install
+    if !errorlevel! neq 0 (
+        echo Failed to install backend dependencies
+        exit /b 1
+    )
+    cd ..
+) else (
+    echo Backend directory not found
+    exit /b 1
+)
+
+REM Install frontend dependencies
+if exist "frontend" (
+    echo Installing frontend dependencies...
+    cd frontend
+    call npm install
+    if !errorlevel! neq 0 (
+        echo Failed to install frontend dependencies
+        exit /b 1
+    )
+    cd ..
+) else (
+    echo Frontend directory not found
+    exit /b 1
+)
+exit /b 0 
