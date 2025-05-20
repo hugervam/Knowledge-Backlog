@@ -55,8 +55,8 @@ if (-not (Test-CommandExists "node")) {
     Write-Host "Installing Node.js..." -ForegroundColor Yellow
 
     try {
-        # Download Node.js installer
-        $nodeUrl = "https://nodejs.org/dist/v18.17.0/node-v18.17.0-x64.msi"
+        # Download Node.js installer - using LTS version 20.x
+        $nodeUrl = "https://nodejs.org/dist/v20.11.1/node-v20.11.1-x64.msi"
         $installerPath = Join-Path $PWD.Path "node-installer.msi"
 
         Write-Host "Downloading Node.js installer..." -ForegroundColor Yellow
@@ -80,7 +80,17 @@ if (-not (Test-CommandExists "node")) {
         exit 1
     }
 } else {
-    Write-Host "Node.js is already installed: $(node --version)" -ForegroundColor Green
+    $nodeVersion = node --version
+    Write-Host "Node.js is already installed: $nodeVersion" -ForegroundColor Green
+    
+    # Check if Node.js version is compatible
+    $version = [Version]($nodeVersion -replace 'v', '')
+    $minVersion = [Version]"20.0.0"
+    if ($version -lt $minVersion) {
+        Write-Host "Warning: Node.js version is older than recommended (v20.x)" -ForegroundColor Yellow
+        Write-Host "Some features might not work correctly" -ForegroundColor Yellow
+        Write-Host "Consider updating to Node.js v20.x LTS" -ForegroundColor Yellow
+    }
 }
 
 # Check for npm
@@ -90,7 +100,8 @@ if (-not (Test-CommandExists "npm")) {
     Write-Host "Please run the Node.js installer again" -ForegroundColor Yellow
     exit 1
 } else {
-    Write-Host "npm is already installed: $(npm --version)" -ForegroundColor Green
+    $npmVersion = npm --version
+    Write-Host "npm is already installed: $npmVersion" -ForegroundColor Green
 }
 
 # Check for Git
@@ -130,10 +141,19 @@ if (-not (Test-CommandExists "git")) {
 
 # Install global npm packages
 Write-Host "Installing global npm packages..." -ForegroundColor Yellow
-npm install -g npm@latest
+# Install a compatible version of npm based on Node.js version
+$nodeVersion = node --version
+$version = [Version]($nodeVersion -replace 'v', '')
+if ($version -ge [Version]"20.0.0") {
+    npm install -g npm@latest
+} else {
+    # Use a version compatible with Node.js 18.x
+    npm install -g npm@9.8.1
+}
+
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Failed to update npm" -ForegroundColor Red
-    exit 1
+    Write-Host "Continuing with current npm version..." -ForegroundColor Yellow
 }
 
 # Check if we're in a git repository
