@@ -31,15 +31,48 @@ if %errorlevel% neq 0 (
     echo Node.js is not installed
     echo Installing Node.js...
     
-    REM Download Node.js installer
-    powershell -Command "& {Invoke-WebRequest -Uri 'https://nodejs.org/dist/v18.17.0/node-v18.17.0-x64.msi' -OutFile 'node-installer.msi'}"
+    echo [DEBUG] Current directory: %CD%
+    echo [DEBUG] Checking PowerShell execution policy...
+    powershell -Command "Get-ExecutionPolicy"
+    
+    echo [DEBUG] Attempting to download Node.js installer...
+    powershell -Command "& {
+        $ErrorActionPreference = 'Stop'
+        try {
+            Write-Host 'Testing connection to nodejs.org...'
+            Test-NetConnection nodejs.org -Port 443
+            
+            Write-Host 'Downloading Node.js installer...'
+            $url = 'https://nodejs.org/dist/v18.17.0/node-v18.17.0-x64.msi'
+            $output = 'node-installer.msi'
+            
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+            Invoke-WebRequest -Uri $url -OutFile $output -UseBasicParsing
+            
+            if (Test-Path $output) {
+                Write-Host 'Download completed successfully'
+                exit 0
+            } else {
+                Write-Host 'Download failed - file not found'
+                exit 1
+            }
+        } catch {
+            Write-Host 'Error occurred:'
+            Write-Host $_.Exception.Message
+            exit 1
+        }
+    }"
+    
     if %errorlevel% neq 0 (
         echo Failed to download Node.js installer
+        echo Please try downloading Node.js manually from https://nodejs.org/
+        echo After installing Node.js, run this script again
         pause
         exit /b 1
     )
     
     REM Install Node.js silently
+    echo [DEBUG] Installing Node.js...
     msiexec /i node-installer.msi /qn
     if %errorlevel% neq 0 (
         echo Failed to install Node.js
