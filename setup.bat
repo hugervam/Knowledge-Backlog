@@ -24,6 +24,55 @@ echo.
 echo [DEBUG] About to check command_exists function
 echo [DEBUG] Current errorlevel: %errorlevel%
 
+REM Function to check if a command exists
+:command_exists
+echo [DEBUG] Inside command_exists function
+where %1 >nul 2>nul
+if %errorlevel% neq 0 (
+    echo [DEBUG] Command %1 not found
+    exit /b 1
+) else (
+    echo [DEBUG] Command %1 found
+    exit /b 0
+)
+
+echo [DEBUG] After command_exists function definition
+
+REM Function to install project dependencies
+:install_dependencies
+echo Installing project dependencies...
+
+REM Install backend dependencies
+if exist "backend" (
+    echo Installing backend dependencies...
+    cd backend
+    call npm install
+    if !errorlevel! neq 0 (
+        echo Failed to install backend dependencies
+        exit /b 1
+    )
+    cd ..
+) else (
+    echo Backend directory not found
+    exit /b 1
+)
+
+REM Install frontend dependencies
+if exist "frontend" (
+    echo Installing frontend dependencies...
+    cd frontend
+    call npm install
+    if !errorlevel! neq 0 (
+        echo Failed to install frontend dependencies
+        exit /b 1
+    )
+    cd ..
+) else (
+    echo Frontend directory not found
+    exit /b 1
+)
+goto :eof
+
 REM Check for Node.js
 echo Checking for Node.js...
 call :command_exists node
@@ -31,48 +80,15 @@ if %errorlevel% neq 0 (
     echo Node.js is not installed
     echo Installing Node.js...
     
-    echo [DEBUG] Current directory: %CD%
-    echo [DEBUG] Checking PowerShell execution policy...
-    powershell -Command "Get-ExecutionPolicy"
-    
-    echo [DEBUG] Attempting to download Node.js installer...
-    powershell -Command "& {
-        $ErrorActionPreference = 'Stop'
-        try {
-            Write-Host 'Testing connection to nodejs.org...'
-            Test-NetConnection nodejs.org -Port 443
-            
-            Write-Host 'Downloading Node.js installer...'
-            $nodeUrl = 'https://nodejs.org/dist/v18.17.0/node-v18.17.0-x64.msi'
-            $installerPath = Join-Path $PWD.Path 'node-installer.msi'
-            
-            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-            Invoke-WebRequest -Uri $nodeUrl -OutFile $installerPath -UseBasicParsing
-            
-            if (Test-Path $installerPath) {
-                Write-Host 'Download completed successfully'
-                exit 0
-            } else {
-                Write-Host 'Download failed - file not found'
-                exit 1
-            }
-        } catch {
-            Write-Host 'Error occurred:'
-            Write-Host $_.Exception.Message
-            exit 1
-        }
-    }"
-    
+    REM Download Node.js installer
+    powershell -Command "& {Invoke-WebRequest -Uri 'https://nodejs.org/dist/v18.17.0/node-v18.17.0-x64.msi' -OutFile 'node-installer.msi'}"
     if %errorlevel% neq 0 (
         echo Failed to download Node.js installer
-        echo Please try downloading Node.js manually from https://nodejs.org/
-        echo After installing Node.js, run this script again
         pause
         exit /b 1
     )
     
     REM Install Node.js silently
-    echo [DEBUG] Installing Node.js...
     msiexec /i node-installer.msi /qn
     if %errorlevel% neq 0 (
         echo Failed to install Node.js
@@ -172,51 +188,4 @@ echo You can now run start-servers.bat to start the application
 echo.
 
 REM Keep the window open
-pause
-
-REM Function to check if a command exists
-:command_exists
-echo [DEBUG] Inside command_exists function
-where %1 >nul 2>nul
-if %errorlevel% neq 0 (
-    echo [DEBUG] Command %1 not found
-    exit /b 1
-) else (
-    echo [DEBUG] Command %1 found
-    exit /b 0
-)
-
-REM Function to install project dependencies
-:install_dependencies
-echo Installing project dependencies...
-
-REM Install backend dependencies
-if exist "backend" (
-    echo Installing backend dependencies...
-    cd backend
-    call npm install
-    if !errorlevel! neq 0 (
-        echo Failed to install backend dependencies
-        exit /b 1
-    )
-    cd ..
-) else (
-    echo Backend directory not found
-    exit /b 1
-)
-
-REM Install frontend dependencies
-if exist "frontend" (
-    echo Installing frontend dependencies...
-    cd frontend
-    call npm install
-    if !errorlevel! neq 0 (
-        echo Failed to install frontend dependencies
-        exit /b 1
-    )
-    cd ..
-) else (
-    echo Frontend directory not found
-    exit /b 1
-)
-exit /b 0 
+pause 
